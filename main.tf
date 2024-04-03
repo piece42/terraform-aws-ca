@@ -77,8 +77,8 @@ resource "aws_s3_object" "cert_info" {
   bucket       = module.internal_s3.s3_bucket_name
   acl          = "private"
   content_type = "application/json"
-  source       = "${path.cwd}/certs/${var.env}/${each.key}.json"
-  source_hash  = filemd5("${path.cwd}/certs/${var.env}/${each.key}.json")
+  source       = "${path.cwd}/certs/${each.key}.json"                 # Removed env from path. Only adds unwanted complexity for P42
+  source_hash  = filemd5("${path.cwd}/certs/${each.key}.json")        # Removed env from path. Only adds unwanted complexity for P42
   kms_key_id   = var.kms_arn_resource == "" ? module.kms_tls_keygen.kms_alias_target_key_arn : null
 }
 
@@ -90,8 +90,8 @@ resource "aws_s3_object" "csrs" {
   bucket       = module.internal_s3.s3_bucket_name
   acl          = "private"
   content_type = "text/plain"
-  source       = "${path.cwd}/certs/${var.env}/csrs/${each.key}"
-  source_hash  = filemd5("${path.cwd}/certs/${var.env}/csrs/${each.key}")
+  source       = "${path.cwd}/certs/csrs/${each.key}"               # Removed env from path. Only adds unwanted complexity for P42
+  source_hash  = filemd5("${path.cwd}/certs/csrs/${each.key}")      # Removed env from path. Only adds unwanted complexity for P42
   kms_key_id   = var.kms_arn_resource == "" ? module.kms_tls_keygen.kms_alias_target_key_arn : null
 }
 
@@ -172,110 +172,110 @@ module "tls_keygen_iam" {
   internal_s3_bucket_arn = module.internal_s3.s3_bucket_arn
 }
 
-module "create_rsa_root_ca_lambda" {
-  # Lambda function to check for existence and otherwise create Root CA using KMS private key
-  source = "./modules/terraform-aws-ca-lambda"
+# module "create_rsa_root_ca_lambda" {
+#   # Lambda function to check for existence and otherwise create Root CA using KMS private key
+#   source = "./modules/terraform-aws-ca-lambda"
 
-  project                         = var.project
-  env                             = var.env
-  function_name                   = "create-root-ca"
-  description                     = "create Root Certificate Authority with KMS private key"
-  external_s3_bucket              = module.external_s3.s3_bucket_name
-  internal_s3_bucket              = module.internal_s3.s3_bucket_name
-  logging_account_id              = var.logging_account_id
-  subscription_filter_destination = var.subscription_filter_destination
-  filter_pattern                  = var.filter_pattern
-  root_ca_info                    = var.root_ca_info
-  lambda_role_arn                 = module.create_root_ca_iam.lambda_role_arn
-  domain                          = var.hosted_zone_domain
-  runtime                         = var.runtime
-  public_crl                      = var.public_crl
-}
+#   project                         = var.project
+#   env                             = var.env
+#   function_name                   = "create-root-ca"
+#   description                     = "create Root Certificate Authority with KMS private key"
+#   external_s3_bucket              = module.external_s3.s3_bucket_name
+#   internal_s3_bucket              = module.internal_s3.s3_bucket_name
+#   logging_account_id              = var.logging_account_id
+#   subscription_filter_destination = var.subscription_filter_destination
+#   filter_pattern                  = var.filter_pattern
+#   root_ca_info                    = var.root_ca_info
+#   lambda_role_arn                 = module.create_root_ca_iam.lambda_role_arn
+#   domain                          = var.hosted_zone_domain
+#   runtime                         = var.runtime
+#   public_crl                      = var.public_crl
+# }
 
-module "create_rsa_issuing_ca_lambda" {
-  # Lambda function to check for existence and otherwise create Issuing CA using KMS private key
-  source = "./modules/terraform-aws-ca-lambda"
+# module "create_rsa_issuing_ca_lambda" {
+#   # Lambda function to check for existence and otherwise create Issuing CA using KMS private key
+#   source = "./modules/terraform-aws-ca-lambda"
 
-  project                         = var.project
-  env                             = var.env
-  function_name                   = "create-issuing-ca"
-  description                     = "create Issuing Certificate Authority with KMS private key"
-  external_s3_bucket              = module.external_s3.s3_bucket_name
-  internal_s3_bucket              = module.internal_s3.s3_bucket_name
-  logging_account_id              = var.logging_account_id
-  subscription_filter_destination = var.subscription_filter_destination
-  filter_pattern                  = var.filter_pattern
-  issuing_ca_info                 = var.issuing_ca_info
-  lambda_role_arn                 = module.create_issuing_ca_iam.lambda_role_arn
-  domain                          = var.hosted_zone_domain
-  runtime                         = var.runtime
-  public_crl                      = var.public_crl
-}
+#   project                         = var.project
+#   env                             = var.env
+#   function_name                   = "create-issuing-ca"
+#   description                     = "create Issuing Certificate Authority with KMS private key"
+#   external_s3_bucket              = module.external_s3.s3_bucket_name
+#   internal_s3_bucket              = module.internal_s3.s3_bucket_name
+#   logging_account_id              = var.logging_account_id
+#   subscription_filter_destination = var.subscription_filter_destination
+#   filter_pattern                  = var.filter_pattern
+#   issuing_ca_info                 = var.issuing_ca_info
+#   lambda_role_arn                 = module.create_issuing_ca_iam.lambda_role_arn
+#   domain                          = var.hosted_zone_domain
+#   runtime                         = var.runtime
+#   public_crl                      = var.public_crl
+# }
 
-module "rsa_root_ca_crl_lambda" {
-  # Lambda function to publish Root CA CRL signed by Root CA KMS private key
-  source = "./modules/terraform-aws-ca-lambda"
+# module "rsa_root_ca_crl_lambda" {
+#   # Lambda function to publish Root CA CRL signed by Root CA KMS private key
+#   source = "./modules/terraform-aws-ca-lambda"
 
-  project                         = var.project
-  env                             = var.env
-  function_name                   = "root-ca-crl"
-  description                     = "publish Root CA certificate revocation list signed by KMS private key"
-  external_s3_bucket              = module.external_s3.s3_bucket_name
-  internal_s3_bucket              = module.internal_s3.s3_bucket_name
-  logging_account_id              = var.logging_account_id
-  subscription_filter_destination = var.subscription_filter_destination
-  filter_pattern                  = var.filter_pattern
-  root_ca_info                    = var.root_ca_info
-  root_crl_days                   = var.root_crl_days
-  root_crl_seconds                = var.root_crl_seconds
-  lambda_role_arn                 = module.root_crl_iam.lambda_role_arn
-  domain                          = var.hosted_zone_domain
-  runtime                         = var.runtime
-  public_crl                      = var.public_crl
-}
+#   project                         = var.project
+#   env                             = var.env
+#   function_name                   = "root-ca-crl"
+#   description                     = "publish Root CA certificate revocation list signed by KMS private key"
+#   external_s3_bucket              = module.external_s3.s3_bucket_name
+#   internal_s3_bucket              = module.internal_s3.s3_bucket_name
+#   logging_account_id              = var.logging_account_id
+#   subscription_filter_destination = var.subscription_filter_destination
+#   filter_pattern                  = var.filter_pattern
+#   root_ca_info                    = var.root_ca_info
+#   root_crl_days                   = var.root_crl_days
+#   root_crl_seconds                = var.root_crl_seconds
+#   lambda_role_arn                 = module.root_crl_iam.lambda_role_arn
+#   domain                          = var.hosted_zone_domain
+#   runtime                         = var.runtime
+#   public_crl                      = var.public_crl
+# }
 
-module "rsa_issuing_ca_crl_lambda" {
-  # Lambda function to publish Issuing CA CRL signed by Issuing CA KMS private key
-  source = "./modules/terraform-aws-ca-lambda"
+# module "rsa_issuing_ca_crl_lambda" {
+#   # Lambda function to publish Issuing CA CRL signed by Issuing CA KMS private key
+#   source = "./modules/terraform-aws-ca-lambda"
 
-  project                         = var.project
-  env                             = var.env
-  function_name                   = "issuing-ca-crl"
-  description                     = "publish Issuing CA certificate revocation list signed by KMS private key"
-  external_s3_bucket              = module.external_s3.s3_bucket_name
-  internal_s3_bucket              = module.internal_s3.s3_bucket_name
-  logging_account_id              = var.logging_account_id
-  subscription_filter_destination = var.subscription_filter_destination
-  filter_pattern                  = var.filter_pattern
-  issuing_ca_info                 = var.issuing_ca_info
-  issuing_crl_days                = var.issuing_crl_days
-  issuing_crl_seconds             = var.issuing_crl_seconds
-  lambda_role_arn                 = module.issuing_crl_iam.lambda_role_arn
-  domain                          = var.hosted_zone_domain
-  runtime                         = var.runtime
-  public_crl                      = var.public_crl
-}
+#   project                         = var.project
+#   env                             = var.env
+#   function_name                   = "issuing-ca-crl"
+#   description                     = "publish Issuing CA certificate revocation list signed by KMS private key"
+#   external_s3_bucket              = module.external_s3.s3_bucket_name
+#   internal_s3_bucket              = module.internal_s3.s3_bucket_name
+#   logging_account_id              = var.logging_account_id
+#   subscription_filter_destination = var.subscription_filter_destination
+#   filter_pattern                  = var.filter_pattern
+#   issuing_ca_info                 = var.issuing_ca_info
+#   issuing_crl_days                = var.issuing_crl_days
+#   issuing_crl_seconds             = var.issuing_crl_seconds
+#   lambda_role_arn                 = module.issuing_crl_iam.lambda_role_arn
+#   domain                          = var.hosted_zone_domain
+#   runtime                         = var.runtime
+#   public_crl                      = var.public_crl
+# }
 
-module "rsa_tls_cert_lambda" {
-  # Lambda function to issue TLS certificates signed by Issuing CA KMS private key
-  source = "./modules/terraform-aws-ca-lambda"
+# module "rsa_tls_cert_lambda" {
+#   # Lambda function to issue TLS certificates signed by Issuing CA KMS private key
+#   source = "./modules/terraform-aws-ca-lambda"
 
-  project                         = var.project
-  env                             = var.env
-  function_name                   = "tls-cert"
-  description                     = "issue TLS certificates signed by KMS private key"
-  external_s3_bucket              = module.external_s3.s3_bucket_name
-  internal_s3_bucket              = module.internal_s3.s3_bucket_name
-  logging_account_id              = var.logging_account_id
-  subscription_filter_destination = var.subscription_filter_destination
-  filter_pattern                  = var.filter_pattern
-  issuing_ca_info                 = var.issuing_ca_info
-  lambda_role_arn                 = module.tls_keygen_iam.lambda_role_arn
-  domain                          = var.hosted_zone_domain
-  runtime                         = var.runtime
-  public_crl                      = var.public_crl
-  allowed_invocation_principals   = var.aws_principals
-}
+#   project                         = var.project
+#   env                             = var.env
+#   function_name                   = "tls-cert"
+#   description                     = "issue TLS certificates signed by KMS private key"
+#   external_s3_bucket              = module.external_s3.s3_bucket_name
+#   internal_s3_bucket              = module.internal_s3.s3_bucket_name
+#   logging_account_id              = var.logging_account_id
+#   subscription_filter_destination = var.subscription_filter_destination
+#   filter_pattern                  = var.filter_pattern
+#   issuing_ca_info                 = var.issuing_ca_info
+#   lambda_role_arn                 = module.tls_keygen_iam.lambda_role_arn
+#   domain                          = var.hosted_zone_domain
+#   runtime                         = var.runtime
+#   public_crl                      = var.public_crl
+#   allowed_invocation_principals   = var.aws_principals
+# }
 
 module "cloudfront_certificate" {
   source = "./modules/terraform-aws-ca-acm"
