@@ -9,6 +9,6 @@ module "certificate_authority" {
 
   providers = {
     aws           = aws
-    aws.us-east-1 = aws.us-east-1 # required even if CloudFront not used
+    aws.us-east-1 = aws.east # required even if CloudFront not used
   }
 }

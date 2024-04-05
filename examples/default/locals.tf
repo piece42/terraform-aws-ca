@@ -1,4 +1,4 @@
-/*
+
 locals {
   issuing_ca_info = {
     country              = "GB"
@@ -20,4 +20,4 @@ locals {
     pathLengthConstraint = 1
   }
 }
-*/
+
