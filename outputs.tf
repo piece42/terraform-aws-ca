@@ -27,3 +27,16 @@ output "root_ca_crl_s3_location" {
   value       = contains(var.prod_envs, var.env) ? "${module.external_s3.s3_bucket_domain_name}/${var.project}-root-ca.crl" : "${module.external_s3.s3_bucket_domain_name}/${var.project}-root-ca-${var.env}.crl"
   description = "S3 location of Root CA CRL file"
 }
+
+#
+# Piece 42 Additions
+#
+output "external_bucket_name" {
+  value       = module.external_s3.s3_bucket_name
+  description = "Name of the S3 bucket used for external storage"
+}
+
+output "internal_bucket_name" {
+  value       = module.internal_s3.s3_bucket_name
+  description = "Name of the S3 bucket used for internal storage"
+}

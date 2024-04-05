@@ -44,7 +44,7 @@ module "external_s3" {
   # S3 bucket for CRL and CA certificate publication
   source = "./modules/terraform-aws-ca-s3"
 
-  purpose                = "${var.project}-ca-external-${var.env}"
+  purpose                = "${var.project}-ca-external" # Removed env from purpose. Only adds unwanted complexity for P42
   global_bucket          = true
   bucket_prefix          = var.bucket_prefix
   access_logs            = var.access_logs
@@ -60,7 +60,7 @@ module "internal_s3" {
   # S3 bucket for internal processing of JSON files for certificates to be issued and revoked
   source = "./modules/terraform-aws-ca-s3"
 
-  purpose          = "${var.project}-ca-internal-${var.env}"
+  purpose          = "${var.project}-ca-internal" # Removed env from purpose. Only adds unwanted complexity for P42
   global_bucket    = true
   bucket_prefix    = var.bucket_prefix
   access_logs      = var.access_logs
