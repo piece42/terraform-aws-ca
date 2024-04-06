@@ -40,3 +40,29 @@ output "internal_bucket_name" {
   value       = module.internal_s3.s3_bucket_name
   description = "Name of the S3 bucket used for internal storage"
 }
+
+output "ddb_table_arn" {
+  value       = module.dynamodb.ddb_table_arn
+  description = "ARN of the DynamoDB table used for storing CA information"
+}
+
+output "kms_arn_issuing_ca" {
+  value       = module.kms_rsa_issuing_ca.kms_arn
+  description = "Information about the Issuing CA"
+}
+
+output "kms_arn_root_ca" {
+  value       = module.kms_rsa_root_ca.kms_arn
+  description = "Information about the Root CA"
+}
+
+output "kms_arn_tls_keygen" {
+  value       = module.kms_tls_keygen.kms_arn
+  description = "Information about the TLS Keygen"
+}
+
+output "kms_arn_resource" {
+  value       = var.kms_arn_resource
+  description = "Information about the Resource"
+  
+}
