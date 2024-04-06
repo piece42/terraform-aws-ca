@@ -95,82 +95,82 @@ resource "aws_s3_object" "csrs" {
   kms_key_id   = var.kms_arn_resource == "" ? module.kms_tls_keygen.kms_alias_target_key_arn : null
 }
 
-module "create_root_ca_iam" {
-  # IAM role and policy assumed by create Root CA lambda using KMS private key
-  source = "./modules/terraform-aws-ca-iam"
+# module "create_root_ca_iam" {
+#   # IAM role and policy assumed by create Root CA lambda using KMS private key
+#   source = "./modules/terraform-aws-ca-iam"
 
-  project                = var.project
-  env                    = var.env
-  function_name          = "create-root-ca"
-  kms_arn_root_ca        = module.kms_rsa_root_ca.kms_arn
-  kms_arn_resource       = var.kms_arn_resource == "" ? module.kms_tls_keygen.kms_arn : var.kms_arn_resource
-  ddb_table_arn          = module.dynamodb.ddb_table_arn
-  policy                 = "root_ca"
-  external_s3_bucket_arn = module.external_s3.s3_bucket_arn
-  internal_s3_bucket_arn = module.internal_s3.s3_bucket_arn
-}
+#   project                = var.project
+#   env                    = var.env
+#   function_name          = "create-root-ca"
+#   kms_arn_root_ca        = module.kms_rsa_root_ca.kms_arn
+#   kms_arn_resource       = var.kms_arn_resource == "" ? module.kms_tls_keygen.kms_arn : var.kms_arn_resource
+#   ddb_table_arn          = module.dynamodb.ddb_table_arn
+#   policy                 = "root_ca"
+#   external_s3_bucket_arn = module.external_s3.s3_bucket_arn
+#   internal_s3_bucket_arn = module.internal_s3.s3_bucket_arn
+# }
 
-module "create_issuing_ca_iam" {
-  # IAM role and policy assumed by create Issuing CA lambda using KMS private key
-  source = "./modules/terraform-aws-ca-iam"
+# module "create_issuing_ca_iam" {
+#   # IAM role and policy assumed by create Issuing CA lambda using KMS private key
+#   source = "./modules/terraform-aws-ca-iam"
 
-  project                = var.project
-  env                    = var.env
-  function_name          = "create-issuing-ca"
-  kms_arn_root_ca        = module.kms_rsa_root_ca.kms_arn
-  kms_arn_issuing_ca     = module.kms_rsa_issuing_ca.kms_arn
-  kms_arn_resource       = var.kms_arn_resource == "" ? module.kms_tls_keygen.kms_arn : var.kms_arn_resource
-  ddb_table_arn          = module.dynamodb.ddb_table_arn
-  policy                 = "issuing_ca"
-  external_s3_bucket_arn = module.external_s3.s3_bucket_arn
-  internal_s3_bucket_arn = module.internal_s3.s3_bucket_arn
-}
+#   project                = var.project
+#   env                    = var.env
+#   function_name          = "create-issuing-ca"
+#   kms_arn_root_ca        = module.kms_rsa_root_ca.kms_arn
+#   kms_arn_issuing_ca     = module.kms_rsa_issuing_ca.kms_arn
+#   kms_arn_resource       = var.kms_arn_resource == "" ? module.kms_tls_keygen.kms_arn : var.kms_arn_resource
+#   ddb_table_arn          = module.dynamodb.ddb_table_arn
+#   policy                 = "issuing_ca"
+#   external_s3_bucket_arn = module.external_s3.s3_bucket_arn
+#   internal_s3_bucket_arn = module.internal_s3.s3_bucket_arn
+# }
 
-module "root_crl_iam" {
-  # IAM role and policy assumed by Root CA lambda using KMS private key
-  source = "./modules/terraform-aws-ca-iam"
+# module "root_crl_iam" {
+#   # IAM role and policy assumed by Root CA lambda using KMS private key
+#   source = "./modules/terraform-aws-ca-iam"
 
-  project                = var.project
-  env                    = var.env
-  function_name          = "root-crl"
-  kms_arn_root_ca        = module.kms_rsa_root_ca.kms_arn
-  kms_arn_resource       = var.kms_arn_resource == "" ? module.kms_tls_keygen.kms_arn : var.kms_arn_resource
-  ddb_table_arn          = module.dynamodb.ddb_table_arn
-  policy                 = "root_crl"
-  external_s3_bucket_arn = module.external_s3.s3_bucket_arn
-  internal_s3_bucket_arn = module.internal_s3.s3_bucket_arn
-}
+#   project                = var.project
+#   env                    = var.env
+#   function_name          = "root-crl"
+#   kms_arn_root_ca        = module.kms_rsa_root_ca.kms_arn
+#   kms_arn_resource       = var.kms_arn_resource == "" ? module.kms_tls_keygen.kms_arn : var.kms_arn_resource
+#   ddb_table_arn          = module.dynamodb.ddb_table_arn
+#   policy                 = "root_crl"
+#   external_s3_bucket_arn = module.external_s3.s3_bucket_arn
+#   internal_s3_bucket_arn = module.internal_s3.s3_bucket_arn
+# }
 
-module "issuing_crl_iam" {
-  # IAM role and policy assumed by Issuing CA lambda using KMS private key
-  source = "./modules/terraform-aws-ca-iam"
+# module "issuing_crl_iam" {
+#   # IAM role and policy assumed by Issuing CA lambda using KMS private key
+#   source = "./modules/terraform-aws-ca-iam"
 
-  project                = var.project
-  env                    = var.env
-  function_name          = "issuing-crl"
-  kms_arn_issuing_ca     = module.kms_rsa_issuing_ca.kms_arn
-  kms_arn_resource       = var.kms_arn_resource == "" ? module.kms_tls_keygen.kms_arn : var.kms_arn_resource
-  ddb_table_arn          = module.dynamodb.ddb_table_arn
-  policy                 = "issuing_crl"
-  external_s3_bucket_arn = module.external_s3.s3_bucket_arn
-  internal_s3_bucket_arn = module.internal_s3.s3_bucket_arn
-}
+#   project                = var.project
+#   env                    = var.env
+#   function_name          = "issuing-crl"
+#   kms_arn_issuing_ca     = module.kms_rsa_issuing_ca.kms_arn
+#   kms_arn_resource       = var.kms_arn_resource == "" ? module.kms_tls_keygen.kms_arn : var.kms_arn_resource
+#   ddb_table_arn          = module.dynamodb.ddb_table_arn
+#   policy                 = "issuing_crl"
+#   external_s3_bucket_arn = module.external_s3.s3_bucket_arn
+#   internal_s3_bucket_arn = module.internal_s3.s3_bucket_arn
+# }
 
-module "tls_keygen_iam" {
-  # IAM role and policy assumed by TLS certificate lambda using issuing CA KMS private key
-  source = "./modules/terraform-aws-ca-iam"
+# module "tls_keygen_iam" {
+#   # IAM role and policy assumed by TLS certificate lambda using issuing CA KMS private key
+#   source = "./modules/terraform-aws-ca-iam"
 
-  project                = var.project
-  env                    = var.env
-  function_name          = "tls-cert"
-  kms_arn_issuing_ca     = module.kms_rsa_issuing_ca.kms_arn
-  kms_arn_tls_keygen     = module.kms_tls_keygen.kms_arn
-  kms_arn_resource       = var.kms_arn_resource == "" ? module.kms_tls_keygen.kms_arn : var.kms_arn_resource
-  ddb_table_arn          = module.dynamodb.ddb_table_arn
-  policy                 = "tls_cert"
-  external_s3_bucket_arn = module.external_s3.s3_bucket_arn
-  internal_s3_bucket_arn = module.internal_s3.s3_bucket_arn
-}
+#   project                = var.project
+#   env                    = var.env
+#   function_name          = "tls-cert"
+#   kms_arn_issuing_ca     = module.kms_rsa_issuing_ca.kms_arn
+#   kms_arn_tls_keygen     = module.kms_tls_keygen.kms_arn
+#   kms_arn_resource       = var.kms_arn_resource == "" ? module.kms_tls_keygen.kms_arn : var.kms_arn_resource
+#   ddb_table_arn          = module.dynamodb.ddb_table_arn
+#   policy                 = "tls_cert"
+#   external_s3_bucket_arn = module.external_s3.s3_bucket_arn
+#   internal_s3_bucket_arn = module.internal_s3.s3_bucket_arn
+# }
 
 # module "create_rsa_root_ca_lambda" {
 #   # Lambda function to check for existence and otherwise create Root CA using KMS private key
